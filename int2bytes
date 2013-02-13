@@ -1,0 +1,72 @@
+#!/usr/bin/python3
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# A pipable script returning a short, human bytes str (1024 > 1K)
+
+# Usage: echo '12345'' | int2bytes
+#        int2bytes '12345'
+#        cat /tmp/numbers.lst | int2bytes
+#        int2bytes /tmp/numbers.lst
+
+# Depends: python3 (for io.StingIO)
+
+# Configuration: BOARD -> an ordered array of conversion suffixes
+#                ROUND -> defines the rounded number's max size
+
+# This script can be usefull on piping operations, it converts the
+# given data into human readable byte values (e.g. 1024 becomdes 1K)
+# The given data is stdin OR file://argv[1] OR "argv[1]"
+
+# i used it in the past in a conky script, now i use it rarely, but
+# sometimes i m happy to get it already in my HD, for occasionnal
+# parsing and data threatment operations from temporary shell scripts.
+
+BOARD = ['B', 'K', 'M', 'G', 'T']
+ROUND = 4
+
+
+from sys import stdin, argv, exit
+from os import path, access, R_OK as read
+
+# use stdin if something has been piped
+if not stdin.isatty():
+    file = stdin
+
+# else, if not only one argument is given, exit/err
+elif len(argv) != 2:
+    exit(1)
+
+# if the argument is a readable regular file, use it
+elif path.isfile(argv[1]) and access(argv[1], read):
+    file = open(argv[1], 'r')
+
+# else, use the given string
+else:
+    from io import StringIO
+    file = StringIO(argv[1])
+
+base = 1024 # of course...
+
+# keep only the 4 first chars
+def shorten(num):
+    return( str(num)[:4].strip('.') )
+
+# convert int 2 bytes
+def convert(raw):
+    for seq in range(len(BOARD))[::-1]:
+        if raw >= base**seq:
+            val = raw / (base**seq)
+            return( shorten(val) + BOARD[seq] )
+    return( str(raw) + BOARD[0] )
+
+# threat each file line, 1 by 1, and convert
+for line in file.readlines():
+    line = line.strip()
+    try:
+        print( convert(int(line)) )
+    except:
+        # if NaN, return empty line
+        print()
