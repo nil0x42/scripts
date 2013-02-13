@@ -1,0 +1,26 @@
+#!/usr/bin/python
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Print the absolute path of the specified file
+
+# Usage: abspath <relative-path>
+
+# Note that the python's os.path.realpath() function is used, making
+# the script show the real path of the given argument, translating
+# eventual unix symbolic links.
+
+# PS: If an unexisting file is given as argument, the realpath of the
+#     file if it existed if given istead of returning and error, this
+#     is not a mistake from me, but a voluntarily caused behavior due
+#     to my personal use.
+
+from sys import argv
+from os.path import realpath
+
+try: arg = argv[1]
+except: arg = ''
+
+print(realpath(arg))
