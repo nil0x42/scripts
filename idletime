@@ -10,6 +10,7 @@
 #        idletime [idle-seconds]
 
 # Depends: xprintidle
+#          sysvinit-tools (for pidof)
 
 # Configuration: BLACKLIST -> a space separated list of processes that
 #                             disable the idle status
