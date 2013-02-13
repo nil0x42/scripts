@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Determine if the current X logged user has to be considered as idle
+
+# Usage: idletime
+#        idletime [idle-seconds]
+
+# Depends: xprintidle
+
+# Configuration: BLACKLIST -> a space separated list of processes that
+#                             disable the idle status
+
+# If run without argument, the script simply prints the current idle time
+# in seconds.
+# If argv[1] is not an integer, or a $BLACKLIST process is running, or the
+# X logged user has not been idle at least the given argv[1] seconds, then
+# false is returned
+# Else, true is returned
+
+# I personnaly use this script in my xmanager script, that manages things
+# like auto screen locking with xlock when i am idle, or xgamma progressive
+# red gamma enhancing when my battery is critically low.
+# I also use it in my notify.pl's irssi script, to be alerted by a sound if
+# is was hilighted on irc AND i was idle more than X seconds.
+#If argv[1] is an int
+
+# the programs blocking idle state (space separated)
+BLACKLIST="mplayer"
+
+# the current idle time in seconds
+IDLE_TIME=$(( (`xprintidle`+500) / 1000 ))
+
+# if no argument, then return idle time in seconds
+if [ -z "$1" ]; then
+    echo $IDLE_TIME
+    exit 0
+fi
+
+# if argument NaN, return False
+if [[ "$1" !=~ ^-?[0-9]+$ ]]; then
+    exit 1
+fi
+
+# If a BLACKLIST process is running, return False
+for app in $BLACKLIST; do
+    pidof $app > /dev/null 2>&1 && exit 1
+done
+
+# Return False if the user has been idle less than required
+[ $IDLE_TIME -lt $1 ] && exit 1
+
+# Else return true
+exit 0
