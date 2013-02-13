@@ -1,0 +1,6 @@
+Here you will find a collection of self made python and bash scripts
+that i use regularly for various automated and manual shell tasks.
+
+For better integration, my ~/.bashrc is configured to load the scripts
+directory in the $PATH envirnment variable.
+(a.k.a. export PATH = "$HOME/dev/scripts: $PATH")
