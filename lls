@@ -1,0 +1,74 @@
+#!/usr/bin/python3
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# List dir like "ls", but with real size of files AND DIRS too
+
+# Usage: lls
+#        lls ./
+
+# Depends: python3
+
+# This script lists like ls, but replacing the built-in ls's size output
+# by the "du -sh"'s one.
+# It is jusgt a very basic coreutils command parser, but i like the ls -alFh
+# output, with the recursion precision of the du -sh soiize outputs.
+
+# It was done in a very quick time, and a few times i encoutered a small
+# parsing bug, showing bad output, so if u want to patch this, come on !
+
+from sys import argv
+from re import findall
+from os import popen, listdir, path
+
+_showlist = 'ls -alFh --color=always "%s"'
+_getlist  = 'ls -a "%s"'
+_getsize  = 'du -sh "%s"'
+
+try: target = argv[1]
+except: target = '.'
+target = path.abspath(path.expanduser(target))
+print(target)
+
+try: elems = listdir(target)+['.','..']
+except: elems = list()
+
+sizeof = dict()
+for elem in elems:
+    if elem == '..':
+        sizeof[elem] = ' n/a'
+        continue
+    getsize = _getsize
+    if elem == '.':
+        getsize+= ' 2> /dev/null'
+    abspath = path.join(target, elem)
+    if not path.isdir(abspath):
+        continue
+    size = popen(getsize % abspath).read()
+    sizeof[elem] = ('    '+size[:size.find('\t')])[-4:]
+
+result = popen(_showlist % target).read().strip().split('\n')
+total = False
+if result[0].startswith('total '):
+    result = result[1:]
+    total = True
+if not result:
+    exit(1)
+
+try: sinceSize = findall('\S+\s+\S+\s+\S+\s+\S+\s+(.+)', result[0])[0]
+except: exit(1)
+pos = result[0].find(sinceSize)
+pos-= 4-sinceSize.find(' ')
+
+n=0
+listed = popen(_getlist % target).read().strip().split('\n')
+for elem in listed:
+    if elem in sizeof.keys():
+        result[n] = result[n][:pos]+sizeof[elem]+result[n][pos+4:]
+    n+=1
+
+if total:
+    print('total '+sizeof['.'].strip())
+print('\n'.join(result))
