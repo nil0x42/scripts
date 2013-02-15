@@ -1,0 +1,41 @@
+#!/usr/bin/python3
+#-*- coding: iso-8859-15 -*-
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Convert affix dictionnaries into basic wordlists
+
+# Usage: dic2lst /tmp/affix-czech.dic > /pentest/wordlists/czech.lst
+
+# Depends: python3
+
+# This is just a very basic filetype converter, it transforms affix
+# dictionnaries like this one:
+# http://www.lel.ed.ac.uk/ihd/laos/tagged_data/NRN/cawdor0902.dic
+# into a basic wordlist, usables for cracking or other purposes.
+
+from sys import argv, exit
+
+if len(argv) != 2:
+    exit( "Usage: dic2lst [filepath]" )
+
+try:
+    data = open(argv[1],'r')
+
+except OSError as e:
+    exit( "File error: '%s': %s" % (e.filename,e.strerror) )
+
+except:
+    exit( "Unknow error" )
+
+
+for line in data.readlines():
+    if '/' in line:
+        word = line[:line.find('/')]
+        word = word.strip('$')
+        if '{' in word:
+            word = word[:word.find('{')]
+        if word:
+            print(word)
