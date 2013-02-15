@@ -1,0 +1,61 @@
+#!/usr/bin/python3
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Get the full list of currently installed binaries from $PATH
+
+# Usage: lsbin
+#        lsbin | grep "fs"
+#        lsbin -f | egrep "^/sbin/"
+
+# Depends: python3
+
+# I quickly made this script because was annoyed to regularly use
+# messy commands like >> locate "bin/" | grep "string" << or other
+# misfit solutions. It allows you to easily search for forgotten
+# exact binary names, which in my case often happens, because i have
+# at least 3000 commands, and i don't use all of them every day.
+
+# For example, if you want to list all commands related to filesystem
+# operations, you can try the: lsbin | grep "fs" command.
+# To list them with absolute path, use lsbin -f.
+
+import os
+from sys import argv
+
+PRINT_FULLPATH = False
+
+# if '-f' as argument, then use FULLPATHS
+if len(argv) > 1:
+    if argv[1] == '-f':
+        PRINT_FULLPATH = True
+
+# get the $PATH env var
+env_path = os.environ.get('PATH')
+
+# split it
+path_lst = env_path.split(':')
+
+# remove duplicates preserving order
+path_lst = [x for i,x in enumerate(path_lst) if x not in path_lst[i+1:]]
+
+
+for folder in path_lst:
+    # get the elements contained in path folder
+    try: content = os.listdir(folder)
+    except: content = []
+
+    # for each element
+    for filename in content:
+        abspath = os.path.join(folder, filename)
+        # if it is a regular file
+        if os.path.isfile(abspath):
+            # and is executables
+            if os.access(abspath, os.X_OK):
+                # then print it
+                if PRINT_FULLPATH:
+                    print(abspath)
+                else:
+                    print(filename)
