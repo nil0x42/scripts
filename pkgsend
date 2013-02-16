@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# A small archlinux package building uploader
+
+# Configuration: PKG_DIR="path/to/pkgbuilds/dir"
+
+# This just helps me on directly uploading my packages
+# previously tested with the pkgtest script
+
+PKG_DIR="${HOME}/dev/pkgbuild"
+
+tmp_dir=".pkgtest"
+
+if [[ $PKG_DIR != "$(dirname `readlink -f .`)" ]]; then
+    echo "You are not in a pkgbuild directory"
+    exit 1
+fi
+
+if ! [[ -d "${tmp_dir}" ]]; then
+    echo "./${tmp_dir}/ not found !"
+    exit 1
+fi
+
+for file in $( ls | egrep -v ^${tmp_dir}$ ); do
+    diff --brief "${file}" "${tmp_dir}/${file}"
+    if (( $? )); then
+        echo "Please run pkgtest before"
+        exit 1
+    fi
+done
+
+cd "$tmp_dir"
+makepkg --source
+burp -v *.src.tar.gz

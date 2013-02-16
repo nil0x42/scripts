@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# A small archlinux package building checker
+
+# Configuration: PKG_DIR="path/to/pkgbuilds/dir"
+
+# This just helps me on making pkgbuilds
+# Also take a look at: pkgsend
+
+PKG_DIR="${HOME}/dev/pkgbuild"
+
+tmp_dir=".pkgtest"
+
+if [[ $PKG_DIR != "$(dirname `readlink -f .`)" ]]; then
+    echo "You are not in a pkgbuild directory"
+    exit 1
+fi
+
+if ! [[ -f "PKGBUILD" ]]; then
+    echo "PKGBUILD not found !"
+    exit 1
+fi
+
+rm -rf "$tmp_dir"
+pkg_files=`ls`
+mkdir "$tmp_dir"
+
+cp -a $pkg_files "$tmp_dir"
+
+cd "$tmp_dir"
+makepkg
+
+echo -e "\e[33;1m"
+
+echo -e "# Package install tree:\e[32m"
+find pkg/ -exec stat -c "%a %n" {} \; \
+    | sed -e 's/ pkg\// \//'
+
+echo -e "\e[0m"
+
+
