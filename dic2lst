@@ -24,7 +24,7 @@ if len(argv) != 2:
 try:
     data = open(argv[1],'r')
 
-except OSError as e:
+except EnvironmentError as e:
     exit( "File error: '%s': %s" % (e.filename,e.strerror) )
 
 except:
