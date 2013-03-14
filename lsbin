@@ -55,7 +55,10 @@ for folder in path_lst:
             # and is executables
             if os.access(abspath, os.X_OK):
                 # then print it
-                if PRINT_FULLPATH:
-                    print(abspath)
-                else:
-                    print(filename)
+                try:
+                    if PRINT_FULLPATH:
+                        print(abspath)
+                    else:
+                        print(filename)
+                except BrokenPipeError:
+                    exit(1)
