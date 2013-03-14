@@ -1,0 +1,82 @@
+#!/usr/bin/python3
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# A resilient script printing constructor from a MAC Address
+
+# Usage: echo '12345'' | int2bytes
+#        int2bytes '12345'
+#        cat /tmp/numbers.lst | int2bytes
+#        int2bytes /tmp/numbers.lst
+
+# Usage: macinfo 00:ab:cd
+#        macinfo 00-ab-CD
+#        macinfo 00:AB:CD:EF:FF:FF
+#        macinfo --oui-update
+
+# Configuration: OUI_PATH -> the path to store the OUI file
+
+# Usefull to quickly acquire constructor informations from
+# the given MAC Address.
+
+from sys import argv
+from os import path
+from urllib.request import urlopen
+
+OUI_PATH = '~/.config/macinfo.oui'
+
+OUI_REMOTE = 'http://standards.ieee.org/develop/regauth/oui/oui.txt'
+
+delim = ":- _./"
+chars = "0123456789ABCDEF"
+
+
+help = '\n'
+help+= 'macinfo (vendor ascociation)\n'
+help+= 'Usage : macinfo <mac-address>  Get MAC informations\n'
+help+= '        macinfo --oui-update   Update OUI File\n'
+help+= '        macinfo --help         Print this help message\n'
+
+if len(argv) != 2:
+    exit(help)
+
+if argv[1] in ['-h','--help']:
+    exit(help)
+
+OUI_PATH = path.realpath(path.expanduser(OUI_PATH))
+
+if argv[1] == '--oui-update':
+    print('Updating OUI File from %s ...' %OUI_REMOTE)
+    try:
+        OUI = urlopen(OUI_REMOTE).read()
+        open(OUI_PATH,'wb').write(OUI)
+        exit(0)
+    except:
+        exit('An error has occured during upgrade')
+
+mac = argv[1].upper()
+
+if 6 > len(mac) > 18:
+    exit(help)
+
+if mac[2] in delim and mac[5] in delim and len(mac) > 7:
+    mac = mac[0:2]+mac[3:5]+mac[6:8]
+
+if [x for x in mac if x not in chars]:
+        exit('error, bad mac syntax')
+
+mac = mac[0:2]+'-'+mac[2:4]+'-'+mac[4:6]
+
+try: file = open(OUI_PATH,'r').read()
+except: sys.exit('error opening OUI file %s ' %OUI_PATH)
+
+file = file.split('\n\n')
+
+for i in file:
+    if mac in i:
+        print(i+'\n')
+        exit(0)
+
+exit('\nmac not found\n')
