@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Requests a new TOR exit node
+
+# Usage: tor-newip
+
+# Configuration: Set the tor's ControlPort to the same as here
+# A lot of infos can be sent to the tor controller, the doc is
+# available here:
+# https://gitweb.torproject.org/torspec.git/blob_plain/HEAD:/control-spec.txt
+
+CTRL_PORT=9051
+
+CMD="AUTHENTICATE\r\n"   # login to the controlport (no pass by default)
+CMD+="SIGNAL NEWNYM\r\n" # clean current circuits, and get new random ip
+CMD+="QUIT\r\n"          # leave the tor's controller
+
+printf "$CMD" | netcat 127.0.0.1 $CTRL_PORT
