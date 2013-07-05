@@ -11,13 +11,12 @@
 
 # Depends: python3
 
-# This script lists like ls, but replacing the built-in ls's size output
-# by the "du -sh"'s one.
-# It is jusgt a very basic coreutils command parser, but i like the ls -alFh
-# output, with the recursion precision of the du -sh soiize outputs.
+# That quickly made script calls the "ls" command with the given argument,
+# and then parses output in order to provide directory full size
+# information by ading the corresponding "du -sh" to output data.
 
-# It was done in a very quick time, and a few times i encoutered a small
-# parsing bug, showing bad output, so if u want to patch this, come on !
+# A few times, a small parsing bug that truncates size appears; feel free
+# to patch it !
 
 from sys import argv
 from re import findall
