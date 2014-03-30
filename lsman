@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Get tu full list of available man pages.
+
+# Usage: lsman [-f] [section]
+#        lsman | grep "fs"
+#        lsman 3 | egrep "/man3/"
+
+# Depends: python3
+
+import os
+from sys import argv
+from subprocess import check_output
+
+PRINT_FULLPATH = False
+SECTION = 0
+
+getcmd = lambda cmd: check_output(cmd, shell=True).decode('utf-8').strip()
+
+# if '-f' as argument, then use FULLPATHS
+if len(argv) > 1:
+    i = 1
+    if argv[1] == '-f':
+        PRINT_FULLPATH = True
+        i = 2
+    if len(argv) > i:
+        try: SECTION = int(argv[i])
+        except: exit("Usage: lsbin [-f] [section]")
+
+# get the $PATH env var
+man_path = getcmd("man -w")
+
+# split it
+path_lst = man_path.split(':')
+
+# remove duplicates preserving order
+path_lst = [x for i,x in enumerate(path_lst) if x not in path_lst[i+1:]]
+
+
+for folder in path_lst:
+    # get the elements contained in path folder
+    try: lst = getcmd("find {} -type f -name *.gz".format(folder)).split("\n");
+    except: lst = []
+
+    # for each element
+    for abspath in lst:
+        # if it is a regular file
+        if not os.path.isfile(abspath):
+            continue
+        filename = os.path.basename(abspath)
+        namelst = filename.split('.')
+        try:
+            assert len(namelst) == 3
+            section = int(namelst[1])
+        except:
+            continue
+        # then print it
+        name = namelst[0]
+        output = abspath if PRINT_FULLPATH else name
+        try:
+            if SECTION and SECTION != section:
+                continue;
+            print(output)
+        except BrokenPipeError:
+            exit(1)
