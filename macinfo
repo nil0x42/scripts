@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # this file is part of the nil0x42's git repositories
 # for the current version, take a look at:
@@ -52,9 +52,9 @@ if argv[1] == '--oui-update':
     try:
         OUI = urlopen(OUI_REMOTE).read()
         open(OUI_PATH,'wb').write(OUI)
-        exit(0)
     except:
         exit('An error has occured during upgrade')
+    exit(0)
 
 mac = argv[1].upper()
 
