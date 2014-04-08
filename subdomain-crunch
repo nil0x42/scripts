@@ -1,0 +1,33 @@
+#!/usr/bin/env bash 
+
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# A command which takes a raw list of domain names
+# as stdin, and returns a short, optimized for common
+# subdomain for online enumeration for example.
+
+# For wordlist optimization, only subdomains that where found at
+# least 2 times in the list are kept. The list is sorted by subdomain
+# frequency>
+
+# Example of usage:
+# ~$ sqlite3 ~/.mozilla/firefox/places.sqlite 'select * from moz_hosts' |
+#       cut -d'|' -f2 |
+#       subdomain-crunch
+
+cat /dev/stdin |
+    grep -E '[a-zA-Z]' |
+    sort |
+    uniq |
+    sed 's/\.[^\.]*$//' |
+    grep -E '\.' |
+    uniq |
+    cut -d'.' -f1 |
+    sort |
+    uniq -c |
+    sort -rn |
+    grep -E -v '^\s+1' |
+    sed -E 's/^ *[0-9]+ //g'
