@@ -9,6 +9,7 @@
 # Usage: lsbin
 #        lsbin | grep "fs"
 #        lsbin -f | egrep "^/sbin/"
+#        pacman -Ql firefox | lsbin -f (show bins in firefox package files)
 
 # Depends: python3
 
@@ -22,14 +23,13 @@
 # operations, you can try the: lsbin | grep "fs" command.
 # To list them with absolute path, use lsbin -f.
 
-import os
-from sys import argv
+import os, sys
 
 PRINT_FULLPATH = False
 
 # if '-f' as argument, then use FULLPATHS
-if len(argv) > 1:
-    if argv[1] == '-f':
+if len(sys.argv) > 1:
+    if sys.argv[1] == '-f':
         PRINT_FULLPATH = True
 
 # get the $PATH env var
@@ -42,6 +42,7 @@ path_lst = env_path.split(':')
 path_lst = [x for i,x in enumerate(path_lst) if x not in path_lst[i+1:]]
 
 
+result = list()
 for folder in path_lst:
     # get the elements contained in path folder
     try: content = os.listdir(folder)
@@ -57,8 +58,23 @@ for folder in path_lst:
                 # then print it
                 try:
                     if PRINT_FULLPATH:
-                        print(abspath)
+                        result.append(abspath)
                     else:
-                        print(filename)
+                        result.append(filename)
                 except BrokenPipeError:
                     exit(1)
+
+result = list(set(sorted(result)))
+
+if not sys.stdin.isatty():
+    stdin = sys.stdin.read().splitlines()
+    old = result
+    result = list()
+    for x in old:
+        for y in stdin:
+            if x in y:
+                result.append(x)
+    # result = [x for x in result if x in stdin]
+
+result = list(set(sorted(result)))
+print(os.linesep.join(result))
