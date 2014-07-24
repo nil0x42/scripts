@@ -12,5 +12,5 @@ Most of them are coded in python or shellscript.
 scripts path to your _$PATH_ environment variable**
 
 ```sh
-    export PATH = "$HOME/dev/scripts: $PATH"
+    export PATH = "$HOME/dev/scripts:$PATH"
 ```
