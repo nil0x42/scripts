@@ -15,7 +15,7 @@
 
 CTRL_PORT=9051
 
-CMD="AUTHENTICATE\r\n"   # login to the controlport (no pass by default)
+CMD+="AUTHENTICATE\r\n"  # login to the controlport (no pass by default)
 CMD+="SIGNAL NEWNYM\r\n" # clean current circuits, and get new random ip
 CMD+="QUIT\r\n"          # leave the tor's controller
 

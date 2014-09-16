@@ -1,0 +1,76 @@
+#!/usr/bin/python2
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Convert a csv file to sql format.
+
+# Usage: csv2sql <csv_file> [<table_name>]
+
+import sys
+import os
+
+
+def _get_next_row(line):
+    if not line or line[0] == ',':
+        row = "Null"
+        line = line
+    elif line and line[0] == '"':
+        line = line[1:]
+        end = line.find('",')
+        if end < 0:
+            if line[:-1] == '"':
+                end = len(line) - 1
+            else:
+                sys.exit('no matching quote in %r' % line)
+        row = line[:end]
+        line = line[(end + 1):]
+    else:
+        end = line.find(',')
+        if end < 0:
+            row = line
+            line = ""
+        else:
+            row = line[:end]
+            line = line[end:]
+    if row != "Null" and not row.startswith("0x"):
+        row = "0x" + row.encode("hex")
+    return row, line
+
+
+def csv2sql(csv_data, table_name="csv2sql"):
+    result = ""
+    len_ref = -1
+    for line in csv_data.splitlines():
+        if not line:
+            continue
+        elems = []
+        row, line = _get_next_row(line)
+        elems.append(row)
+        while line and line[0] == ",":
+            row, line = _get_next_row(line[1:])
+            elems.append(row)
+        if len_ref < 0:
+            len_ref = len(elems)
+        elif len(elems) != len_ref:
+            sys.exit("expected len %d, got %d" % (len_ref, len(elems)))
+        result += "INSERT INTO `%s` VALUES (" % table_name
+        result += ",".join(elems)
+        result += ");" + os.linesep
+    return result.rstrip()
+
+
+if __name__ == "__main__":
+    if len(sys.argv) not in [2, 3]:
+        sys.exit("Usage: %s <file.csv> [table_name]" % sys.argv[0])
+    try:
+        csv_data = open(sys.argv[1], 'r').read().strip()
+    except (IOError, OSError) as err:
+        sys.exit("%s: %s" % (sys.argv[0], err))
+    if len(sys.argv) == 3:
+        table_name = sys.argv[2]
+    else:
+        table_name = "csv2sql"
+    sql_data = csv2sql(csv_data, table_name=table_name)
+    print(sql_data)
