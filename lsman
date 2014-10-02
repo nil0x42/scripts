@@ -29,7 +29,7 @@ if len(argv) > 1:
         i = 2
     if len(argv) > i:
         try: SECTION = int(argv[i])
-        except: exit("Usage: lsbin [-f] [section]")
+        except: exit("Usage: lsman [-f] [section]")
 
 # get the $PATH env var
 man_path = getcmd("man -w")
