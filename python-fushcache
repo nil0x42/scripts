@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Recursive removal of python cache files from <directory>.
+# (removes all `*.pyc` and `__pycache__/` files)
+
+# Usage: python-flushcache <directory>
+
+# If <directory> is undefined, current directory is used.
+
+DIRECTORY=${1:-.}
+
+find "$DIRECTORY" -name \*.pyc -exec rm -f {} \;
+find "$DIRECTORY" -name __pycache__ -prune | xargs rm -rf
