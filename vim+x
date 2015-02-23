@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Open a vim instance with editor's available color codes
+
+# Open a file with execution permission directly
+
+# Usage: vim+x <script-file>
+
+# Mostly useful for people that write and run stupid script everytime.
+
+touch $*
+chmod +x $*
+vim $*
