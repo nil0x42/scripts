@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Open a vim instance with editor's available color codes
+
+# Usage: vimcolors
+
+# This script is useful for people actually doing some improvement in
+# their vim colorscheme and look ;)
+
+vim -c "
+let num = 255|
+while num >= 0|
+    exec 'hi col_'.num.' ctermbg='.num.' ctermfg=white'|
+    exec 'syn match col_'.num.' \"ctermbg='.num.':....\" containedIn=ALL'|
+    call append(0, 'ctermbg='.num.':....')|
+    let num = num - 1|
+endwhile|
+w/tmp/vimcolors|
+goto 1"
+rm /tmp/vimcolors
