@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Remove ansi colors from stdin
+# Grep like, without filtering non-matching lines
+
+# Example: cat /etc/passwd | highlight root
+
+grep --color=always -E '$|'"$1"
