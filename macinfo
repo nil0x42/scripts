@@ -26,8 +26,7 @@ from os import path
 from urllib.request import urlopen
 
 OUI_PATH = '~/.config/macinfo.oui'
-
-OUI_REMOTE = 'http://standards.ieee.org/develop/regauth/oui/oui.txt'
+OUI_REMOTE = 'http://standards-oui.ieee.org/oui.txt'
 
 delim = ":- _./"
 chars = "0123456789ABCDEF"
