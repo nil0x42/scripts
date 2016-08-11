@@ -8,4 +8,4 @@
 
 # Example: echo -e '\033[31m red text' | decolorize
 
-sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
+sed -r "s/\x1B\[[0-9;]*?[m|K]//g"
