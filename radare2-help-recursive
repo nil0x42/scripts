@@ -1,0 +1,22 @@
+#!/usr/bin/python3
+
+import sys, os, r2pipe
+
+r2 = r2pipe.open("-")
+
+# get chars which can be called with '<c>?*'
+r2.cmd("e scr.color=false")
+r2.cmd("e scr.pipecolor=false")
+chars = r2.cmd("?|grep -E '^. .\[\?\]'|cut -c3").splitlines()
+r2.cmd("e scr.color=true")
+r2.cmd("e scr.pipecolor=true")
+
+print(chars)
+exit()
+
+for char in chars:
+    print(r2.cmd(char + "?*"))
+
+##########
+
+
