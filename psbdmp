@@ -1,0 +1,22 @@
+#!/bin/python3
+
+import sys
+import requests
+import json
+
+if len(sys.argv) != 2 or len(sys.argv[1]) != 8:
+    sys.exit("Usage: %s <pastebin-ID>" % sys.argv[0])
+
+pastebin_id = sys.argv[1]
+
+req = requests.get("https://psbdmp.ws/api/dump/get/" + pastebin_id)
+_json = json.loads(req.text)
+
+if _json['error']:
+    sys.exit("ERROR: " + _json['error_info'])
+if _json['id'] != pastebin_id:
+    sys.exit("ERROR: ID %s is different than %s" % (_json['id'], pastebin_id))
+
+print("INFO: %s (%s)" % (_json['id'], _json['tags']))
+open(pastebin_id, 'w').write(_json['data'])
+print("File correctly written to: ./%s" % pastebin_id)
