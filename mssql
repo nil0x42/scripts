@@ -1,0 +1,109 @@
+#!/usr/bin/env python2
+
+import sys, re, time
+import pymssql
+from pprint import pprint
+
+def help():
+    print("Usage:")
+    print("  %s username:password@server[/database] '<SQL QUERY>'" % sys.argv[0])
+    exit(1)
+
+def sql_str_repr(row):
+    return "NULL" if row is None else str(row)
+
+try:
+    assert len(sys.argv) >= 3
+    regex = "^(.+?):(.+?)@(.+?)(?:/(.+?))?$"
+    USER, PASS, HOST, DB = re.findall(regex, sys.argv[1])[0]
+except:
+    help()
+
+
+if DB:
+    conn = pymssql.connect(HOST, USER, PASS)
+else:
+    conn = pymssql.connect(HOST, USER, PASS, DB)
+
+
+
+# `mssql "<SQL COMMAND>"`
+# Run an SQL command.
+sql_query = " ".join(sys.argv[2:]).rstrip(';').strip()
+if sql_query.endswith('\\G'):
+    sql_query = sql_query[:-2].strip()
+    display_mode = "line"
+else:
+    display_mode = "column"
+
+# prepare and send payload
+start_time = time.time()
+
+cursor = conn.cursor()
+try:
+    cursor.execute(sql_query)
+except pymssql.ProgrammingError as e:
+    print(e)
+    sys.exit(1)
+
+fields = [item[0] for item in cursor.description]
+rows = cursor.fetchall()
+rowcount = cursor.rowcount
+conn.commit()
+conn.close()
+
+end_time = time.time()
+
+elapsed_time = "(%s sec)" % str(round(end_time - start_time, 2))
+
+query_type = "GET" if sql_query.lower().startswith("select") else "SET"
+affected_rows = rowcount
+plural = '' if affected_rows == 1 else 's'
+
+pprint(fields)
+pprint(rows)
+
+# Query type: SET
+if query_type == "SET":
+    msg = "[*] Query OK, %d row%s affected %s"
+    print(msg % (affected_rows, plural, elapsed_time))
+    sys.exit(0)
+
+# Query type: GET
+if affected_rows == 0:
+    sys.exit("[*] Empty set %s" % elapsed_time)
+
+if display_mode == "line":
+    field_space = len(max(fields, key=len))
+    fields = [(' ' * (field_space - len(x))) + x for x in fields]
+    header = "*************************** %d. row ***************************"
+    i = 1
+    for row in rows:
+        print(header % i)
+        j = 0
+        for field in fields:
+            print("%s: %s" % (field, sql_str_repr(row[j])))
+            j += 1
+        i += 1
+
+elif display_mode == "column":
+    columns = [[str(field)] for field in fields]
+    for row in rows:
+        for i in range(len(fields)):
+            columns[i].append(sql_str_repr(row[i]))
+    cols_len = [len(max(column, key=len)) for column in columns]
+    delimiter = '+-' + ('-+-'.join(['-' * i for i in cols_len])) + '-+'
+    for row_no in range(len(columns[0])):
+        row = []
+        for field_no in range(len(fields)):
+            value = columns[field_no][row_no]
+            fill = ' ' * (cols_len[field_no] - len(columns[field_no][row_no]))
+            row.append(value + fill)
+        if row_no < 2:
+            print(delimiter)
+        print('| ' + (' | '.join(row)) + ' |')
+    print(delimiter)
+
+msg = "%s row%s in set %s"
+print(msg % (affected_rows, plural, elapsed_time))
+sys.exit(0)
