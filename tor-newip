@@ -13,10 +13,11 @@
 # available here:
 # https://gitweb.torproject.org/torspec.git/blob_plain/HEAD:/control-spec.txt
 
+CTRL_ADDR=127.0.0.1
 CTRL_PORT=9051
 
 CMD+="AUTHENTICATE\r\n"  # login to the controlport (no pass by default)
 CMD+="SIGNAL NEWNYM\r\n" # clean current circuits, and get new random ip
 CMD+="QUIT\r\n"          # leave the tor's controller
 
-printf "$CMD" | netcat 127.0.0.1 $CTRL_PORT
+printf "$CMD" | nc "$CTRL_ADDR" "$CTRL_PORT"
