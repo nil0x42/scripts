@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+
+# this file is part of the nil0x42's git repositories
+# for the current version, take a look at:
+# https://bitbucket.org/nil0x42/scripts
+
+# Prettify CSV output (inspired from phpsploit's mysql plugin)
+
+# Usage: csvread [--line] < ./FILE.CSV
+
+import sys
+import csv
+import magic
+import io
+from pprint import pprint
+
+rows=[]
+
+if sys.stdin.isatty():
+    sys.stderr.write("Pretty format csv file\n")
+    sys.exit("Usage: %s [--line] < ./FILE.CSV" % sys.argv[0])
+
+with open("/dev/stdin", 'rb') as csvfile:
+    data = csvfile.read()
+    m = magic.open(magic.MAGIC_MIME_ENCODING)
+    m.load()
+    encoding = m.buffer(data)
+    
+    data = data.decode(encoding)
+    
+    read = csv.reader(io.StringIO(data))
+    for row in read:
+        rows.append(row)
+
+fields = rows[0]
+rows = rows[1:]
+
+#######################################
+display_mode = "column"
+if len(sys.argv) > 1 and "--line" in sys.argv:
+    display_mode = "line"
+
+if display_mode == "line":
+    field_space = len(max(fields, key=len))
+    fields = [(' ' * (field_space - len(x))) + x for x in fields]
+    header = "*************************** %d. row ***************************"
+    i = 1
+    for row in rows:
+        print(header % i)
+        j = 0
+        for field in fields:
+            print("%s: %s" % (field, row[j]))
+            j += 1
+        i += 1
+
+elif display_mode == "column":
+    columns = [[str(field)] for field in fields]
+    for row in rows:
+        for i in range(len(fields)):
+            columns[i].append(row[i])
+    cols_len = [len(max(column, key=len)) for column in columns]
+    delimiter = '+-' + ('-+-'.join(['-' * i for i in cols_len])) + '-+'
+    for row_no in range(len(columns[0])):
+        row = []
+        for field_no in range(len(fields)):
+            value = columns[field_no][row_no]
+            fill = ' ' * (cols_len[field_no] - len(columns[field_no][row_no]))
+            row.append(value + fill)
+        if row_no < 2:
+            print(delimiter)
+        print('| ' + (' | '.join(row)) + ' |')
+    print(delimiter)
