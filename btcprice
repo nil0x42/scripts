@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# get current bitcoin price in $
+
+wget https://api.coindesk.com/v1/bpi/currentprice.json -q -O - | sed -n -e 's/^.*&#36;","rate":"//p' | cut -d'"' -f1
