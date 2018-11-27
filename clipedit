@@ -6,15 +6,19 @@
 
 # Edit current CLIPBOARD selection with text editor
 
+# After edition, both PRIMARY and CLIPBOARD selections
+# are set to edited change.
+
 # Usage: clipedit
 
 # Depends: xsel, $EDITOR
 
 ## oneliner:
-# r=`mktemp`;xsel -b>$r;vim $r;xsel -b<$r
+# r=`mktemp`;xsel -b>$r;vim $r;xsel -b<$r;rm $r
 
 tmpfile=`mktemp`
 xsel -b > "$tmpfile"
 "$EDITOR" "$tmpfile"
 xsel -b < "$tmpfile"
 xsel < "$tmpfile"
+rm "$tmpfile"
